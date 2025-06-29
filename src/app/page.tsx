@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetAllTasks } from "@/hooks/useQueryHooks";
+import { useCreateNewTask, useGetAllTasks } from "@/hooks/useQueryHooks";
 import { Task } from "@/types";
 import { useState } from "react";
 import TaskCard from "@/components/TaskCard";
@@ -8,13 +8,44 @@ import TaskStats from "@/components/TaskStats";
 import FilterBar from "@/components/FilterBar";
 import { Button } from "@/components/ui/button";
 import { CheckSquare, Plus } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
+import {
+	SignedIn,
+	SignedOut,
+	SignInButton,
+	UserButton,
+	useUser,
+} from "@clerk/nextjs";
+import TaskModal from "@/components/TaskModal";
 
 export default function Home() {
 	const { data } = useGetAllTasks();
+	const { mutateAsync } = useCreateNewTask();
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 	const [editingTask, setEditingTask] = useState<Task | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+	const user = useUser();
+	const clerkUserId = user.user?.id;
+
+	const handleSaveTask = (taskData: Partial<Task>) => {
+		if (!selectedTask) {
+			const newData = {
+				...taskData,
+				clerkUserId: clerkUserId,
+			};
+			mutateAsync(newData);
+		} else if (selectedTask) {
+			console.log(selectedTask, taskData);
+		}
+	};
+
+	const handleEditTask = (task: Task) => {
+		setEditingTask(task);
+	};
+
+	const closeEditModal = () => {
+		setEditingTask(null);
+	};
+
 	return (
 		<main className="min-h-screen bg-background">
 			<section className="container mx-auto px-4 py-8">
@@ -76,15 +107,30 @@ export default function Home() {
 									key={task.id}
 									task={task}
 									// onToggleComplete={toggleTaskComplete}
-									// onEdit={handleEditTask}
+									onEdit={handleEditTask}
 									// onDelete={deleteTask}
-									// onClick={setSelectedTask}
+									onClick={setSelectedTask}
 								/>
 							))}
 						</div>
 					)}
 				</div>
 			</section>
+			{/* Modals */}
+			<TaskModal
+				isOpen={isCreateModalOpen}
+				onClose={() => setIsCreateModalOpen(false)}
+				onSave={handleSaveTask}
+				// users={users}
+			/>
+
+			<TaskModal
+				isOpen={!!editingTask}
+				onClose={closeEditModal}
+				onSave={handleSaveTask}
+				task={editingTask || undefined}
+				// users={users}
+			/>
 		</main>
 	);
 }

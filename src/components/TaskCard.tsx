@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate, isOverdue, getDaysUntilDue } from "@/utils/dateUtils";
 import { Calendar, MoreVertical } from "lucide-react";
+import { useEffect, useState } from "react";
 
 const getPriorityColor = (priority: Task["priority"]) => {
 	switch (priority) {
@@ -29,21 +30,42 @@ const getPriorityColor = (priority: Task["priority"]) => {
 
 interface TaskCardProps {
 	task: Task;
-	// onToggleComplete: (taskId: string) => void;
-	// onEdit: (task: Task) => void;
+	onEdit: (task: Task) => void;
 	// onDelete: (taskId: string) => void;
-	// onClick: (task: Task) => void;
+	onClick: (task: Task) => void;
 }
 
 export default function TaskCard({
 	task,
-}: // onToggleComplete,
-// onEdit,
-// onDelete,
-// onClick,
+	onEdit,
+	onClick,
+}: // onDelete,
 TaskCardProps) {
 	const overdue = task.dueDate && isOverdue(task.dueDate);
 	const daysUntilDue = task.dueDate ? getDaysUntilDue(task.dueDate) : null;
+	const [userName, setUserName] = useState<string>("");
+	const [initials, setInitials] = useState<string>("");
+
+	useEffect(() => {
+		if (task.assignedTo) {
+			fetch(`/api/user/${task.assignedTo}`)
+				.then((res) => res.json())
+				.then((data) => {
+					setUserName(data.name);
+					setInitials(data.initials);
+				})
+				.catch((err) => console.error("Error fetching user:", err));
+		}
+	}, [task.assignedTo]);
+
+	if (!task.assignedTo) return null;
+
+	const handleCardClick = (e: React.MouseEvent) => {
+		if ((e.target as HTMLElement).closest("[data-no-propagation]")) {
+			return;
+		}
+		onClick(task);
+	};
 
 	return (
 		<Card
@@ -52,6 +74,7 @@ TaskCardProps) {
 				task.completed && "opacity-75",
 				overdue && !task.completed && "border-red-300 bg-red-50/30"
 			)}
+			onClick={handleCardClick}
 		>
 			<CardHeader className="pb-3">
 				<div className="flex items-start justify-between">
@@ -59,6 +82,7 @@ TaskCardProps) {
 						<div data-no-propagation>
 							<Checkbox
 								checked={task.completed}
+								onCheckedChange={() => {}}
 								className="mt-1"
 							/>
 						</div>
@@ -89,7 +113,9 @@ TaskCardProps) {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem>Edit Task</DropdownMenuItem>
+								<DropdownMenuItem onClick={() => onEdit(task)}>
+									Edit Task
+								</DropdownMenuItem>
 								<DropdownMenuItem className="text-red-600">
 									Delete Task
 								</DropdownMenuItem>
@@ -144,12 +170,13 @@ TaskCardProps) {
 						<div className="flex items-center space-x-2">
 							<Avatar className="h-6 w-6">
 								<AvatarFallback className="text-xs">
-									{task.assignedTo.name
-										.split(" ")
-										.map((n) => n[0])
-										.join("")}
+									{initials ||
+										task.assignedTo
+											.substring(0, 2)
+											.toUpperCase()}
 								</AvatarFallback>
 							</Avatar>
+							{userName && <span>{userName}</span>}
 						</div>
 					)}
 				</div>
