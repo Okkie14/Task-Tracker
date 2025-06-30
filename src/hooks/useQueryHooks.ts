@@ -1,6 +1,6 @@
 import { fetchUsers } from "@/app/api";
 import { Tasks } from "@/drizzle/schema";
-import { getAllTask, createTask, getTaskDetails, updateTask, deleteTask, updateTaskCompleted } from "@/server/db/tasks";
+import { getAllTask, createTask, updateTask, deleteTask, updateTaskCompleted } from "@/server/db/tasks";
 import { Task } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -27,16 +27,8 @@ export const useCreateNewTask = () => {
         onSuccess: () => {
             // Invalidate or refetch tasks list after creation
             queryClient.invalidateQueries({ queryKey:["tasks"]});
-            queryClient.invalidateQueries({ queryKey: ["taskDetails"] });
         },
     });
-}
-
-export const useTaskDetails = () => {
-    return useQuery({
-        queryKey: ['taskDetails'],
-        queryFn: () => getTaskDetails()
-    })
 }
 
 export const useUpdateTask = () => {
@@ -59,7 +51,6 @@ export const useDeleteTask = () => {
         onSuccess: () => {
             // Invalidate or refetch tasks list after creation
             queryClient.invalidateQueries({ queryKey:["tasks"]});
-            queryClient.invalidateQueries({ queryKey: ["taskDetails"] });
         },
     });
 }
@@ -73,7 +64,6 @@ export function useUpdateTaskCompleted() {
 
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
-            queryClient.invalidateQueries({ queryKey: ["taskDetails"] });
         },
 });
 }

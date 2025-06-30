@@ -120,7 +120,7 @@ export default function Home() {
 				</div>
 				<SignedOut>
 					<section className="flex justify-center items-center">
-						<SignUp />
+						<SignUp routing="hash" />
 					</section>
 				</SignedOut>
 				<SignedIn>
