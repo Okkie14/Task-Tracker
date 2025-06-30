@@ -19,24 +19,9 @@ import TaskModal from "@/components/TaskModal";
 
 export default function Home() {
 	const { data } = useGetAllTasks();
-	const { mutateAsync } = useCreateNewTask();
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 	const [editingTask, setEditingTask] = useState<Task | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-	const user = useUser();
-	const clerkUserId = user.user?.id;
-
-	const handleSaveTask = (taskData: Partial<Task>) => {
-		if (!selectedTask) {
-			const newData = {
-				...taskData,
-				clerkUserId: clerkUserId,
-			};
-			mutateAsync(newData);
-		} else if (selectedTask) {
-			console.log(selectedTask, taskData);
-		}
-	};
 
 	const handleEditTask = (task: Task) => {
 		setEditingTask(task);
@@ -120,14 +105,14 @@ export default function Home() {
 			<TaskModal
 				isOpen={isCreateModalOpen}
 				onClose={() => setIsCreateModalOpen(false)}
-				onSave={handleSaveTask}
+				isEdit={editingTask !== null}
 				// users={users}
 			/>
 
 			<TaskModal
 				isOpen={!!editingTask}
 				onClose={closeEditModal}
-				onSave={handleSaveTask}
+				isEdit={editingTask !== null}
 				task={editingTask || undefined}
 				// users={users}
 			/>

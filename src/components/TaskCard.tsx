@@ -47,18 +47,42 @@ TaskCardProps) {
 	const [initials, setInitials] = useState<string>("");
 
 	useEffect(() => {
-		if (task.assignedTo) {
-			fetch(`/api/user/${task.assignedTo}`)
-				.then((res) => res.json())
-				.then((data) => {
-					setUserName(data.name);
-					setInitials(data.initials);
-				})
-				.catch((err) => console.error("Error fetching user:", err));
-		}
-	}, [task.assignedTo]);
+		const fetchUser = async () => {
+			if (!task.assignedTo) return;
 
-	if (!task.assignedTo) return null;
+			const cacheKey = `user_${task.assignedTo}`;
+			const cached = localStorage.getItem(cacheKey);
+
+			if (cached) {
+				const parsed = JSON.parse(cached);
+				setUserName(parsed.name);
+				setInitials(parsed.initials);
+				return;
+			}
+
+			try {
+				const res = await fetch(`/api/user/${task.assignedTo}`);
+				if (!res.ok) throw new Error("Network response was not ok");
+
+				const data = await res.json();
+				setUserName(data.name);
+				setInitials(data.initials);
+
+				// Cache in localStorage
+				localStorage.setItem(
+					cacheKey,
+					JSON.stringify({
+						name: data.name,
+						initials: data.initials,
+					})
+				);
+			} catch (err) {
+				console.error("Error fetching user:", err);
+			}
+		};
+
+		fetchUser();
+	}, [task.assignedTo]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if ((e.target as HTMLElement).closest("[data-no-propagation]")) {

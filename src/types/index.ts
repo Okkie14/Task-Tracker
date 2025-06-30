@@ -12,8 +12,19 @@ export interface Task {
   description: string;
   completed?: boolean;
   priority: string;
-  dueDate?: string;
-  assignedTo?: string;
+  dueDate: string;
+  assignedTo: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export type CreateTask = {
+  title: string;
+  description: string;
+  completed?: boolean;
+  priority: string;
+  dueDate: string;
+  assignedTo: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +40,6 @@ export type CreateFormData = {
   title: string;
   description: string;
   priority: Task["priority"];
-  dueDate?: string;
-  assignedTo?: string;
+  dueDate: string;
+  assignedTo: string;
 };

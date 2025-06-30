@@ -10,8 +10,22 @@ export async function createTask({ data }: { data: typeof Tasks.$inferInsert }) 
     return result.rows[0]
   }
 
-export async function updateTask() {
+export async function updateTask(id: string, updates: Partial<typeof Tasks.$inferSelect>) {
+  try {
+    const result = await db
+      .update(Tasks)
+      .set({
+        ...updates,
+        updatedAt: new Date(), // update timestamp
+      })
+      .where(eq(Tasks.id, id))
+      .returning();
 
+    return result; // returns updated rows
+  } catch (error) {
+    console.error("Failed to update task:", error);
+    throw error;
+  }
 }
 
 export async function deleteTask() {
