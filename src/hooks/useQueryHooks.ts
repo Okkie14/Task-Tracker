@@ -1,6 +1,6 @@
 import { fetchUsers } from "@/app/api";
 import { Tasks } from "@/drizzle/schema";
-import { getAllTask, createTask, getTaskDetails, updateTask } from "@/server/db/tasks";
+import { getAllTask, createTask, getTaskDetails, updateTask, deleteTask } from "@/server/db/tasks";
 import { Task } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -42,6 +42,18 @@ export const useUpdateTask = () => {
 
     return useMutation({
         mutationFn: ({ id, updates }: { id: string; updates: Partial<typeof Tasks.$inferSelect> }) => updateTask(id, updates),
+        onSuccess: () => {
+            // Invalidate or refetch tasks list after creation
+            queryClient.invalidateQueries({ queryKey:["tasks"]});
+        },
+    });
+}
+
+export const useDeleteTask = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (id: string) => deleteTask(id),
         onSuccess: () => {
             // Invalidate or refetch tasks list after creation
             queryClient.invalidateQueries({ queryKey:["tasks"]});

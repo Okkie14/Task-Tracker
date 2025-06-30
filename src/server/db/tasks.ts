@@ -28,8 +28,17 @@ export async function updateTask(id: string, updates: Partial<typeof Tasks.$infe
   }
 }
 
-export async function deleteTask() {
 
+export async function deleteTask(id: string) {
+  try {
+    await db
+      .delete(Tasks)
+      .where(eq(Tasks.id, id));
+    // Optionally return something or just void
+  } catch (error) {
+    console.error("Failed to delete task:", error);
+    throw error;
+  }
 }
 
 export async function getTasks(userId: string) {

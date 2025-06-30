@@ -1,3 +1,5 @@
+"use client";
+
 import type { Task } from "@/types";
 import {
 	DropdownMenu,
@@ -14,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { formatDate, isOverdue, getDaysUntilDue } from "@/utils/dateUtils";
 import { Calendar, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useDeleteTask } from "@/hooks/useQueryHooks";
 
 const getPriorityColor = (priority: Task["priority"]) => {
 	switch (priority) {
@@ -41,6 +44,7 @@ export default function TaskCard({
 	onClick,
 }: // onDelete,
 TaskCardProps) {
+	const { mutateAsync } = useDeleteTask();
 	const overdue = task.dueDate && isOverdue(task.dueDate);
 	const daysUntilDue = task.dueDate ? getDaysUntilDue(task.dueDate) : null;
 	const [userName, setUserName] = useState<string>("");
@@ -140,7 +144,10 @@ TaskCardProps) {
 								<DropdownMenuItem onClick={() => onEdit(task)}>
 									Edit Task
 								</DropdownMenuItem>
-								<DropdownMenuItem className="text-red-600">
+								<DropdownMenuItem
+									className="text-red-600"
+									onClick={() => mutateAsync(task.id)}
+								>
 									Delete Task
 								</DropdownMenuItem>
 							</DropdownMenuContent>
