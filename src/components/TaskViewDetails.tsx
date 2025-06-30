@@ -17,6 +17,7 @@ import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
 import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
 import PriorityBadge from "./PriorityBadge";
 import DateDisplay from "./DateDisplay";
+import { useState } from "react";
 
 interface TaskDetailViewProps {
 	isOpen: boolean;
@@ -31,9 +32,11 @@ export default function TaskViewDetails({
 	task,
 	onEdit,
 }: TaskDetailViewProps) {
+	if (!task) return null;
+
+	const [localCompleted, setLocalCompleted] = useState(task.completed);
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
-	if (!task) return null;
 
 	const handleEdit = () => {
 		onEdit(task);
@@ -51,6 +54,7 @@ export default function TaskViewDetails({
 			taskId,
 			currentCompleted,
 			taskTitle: task.title,
+			setLocalCompleted,
 		});
 		onClose();
 	};
@@ -62,7 +66,7 @@ export default function TaskViewDetails({
 					<div className="flex items-start justify-between">
 						<div className="flex items-center space-x-3 flex-1">
 							<Checkbox
-								checked={task.completed}
+								checked={localCompleted}
 								onCheckedChange={() =>
 									toggleCompleted(task.id, task.completed)
 								}

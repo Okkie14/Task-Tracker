@@ -20,6 +20,7 @@ import ErrorCard from "./ErrorCard";
 import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
 import PriorityBadge from "./PriorityBadge";
 import DateDisplay from "./DateDisplay";
+import { useState } from "react";
 
 interface TaskCardProps {
 	task: Task;
@@ -43,6 +44,7 @@ export default function TaskCard({
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const overdue = task.dueDate && isOverdue(task.dueDate);
+	const [localCompleted, setLocalCompleted] = useState(task.completed);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if ((e.target as HTMLElement).closest("[data-no-propagation]")) {
@@ -57,6 +59,7 @@ export default function TaskCard({
 			taskId,
 			currentCompleted,
 			taskTitle: task.title,
+			setLocalCompleted,
 		});
 	};
 
@@ -89,7 +92,7 @@ export default function TaskCard({
 					<div className="flex items-start space-x-3 flex-1">
 						<div data-no-propagation>
 							<Checkbox
-								checked={task.completed}
+								checked={localCompleted}
 								onCheckedChange={() =>
 									toggleCompleted(task.id, task.completed)
 								}
