@@ -5,7 +5,6 @@ import { Task } from "@/types";
 
 export function useToggleTaskCompleted(task: Task, updateCompleted: UseMutateFunction<any, any, { id: string; completed: boolean }, unknown>) {
     const [localCompleted, setLocalCompleted] = useState(task.completed);
-
     const toggleCompleted = () => {
         setLocalCompleted(!localCompleted); // Optimistic update
     
@@ -14,7 +13,6 @@ export function useToggleTaskCompleted(task: Task, updateCompleted: UseMutateFun
             {
             onSuccess: () => {
                 toast.success(`${task.title} updated successfully`);
-                setLocalCompleted(localCompleted);
             },
             onError: () => {
                 toast.error("Error updating task");

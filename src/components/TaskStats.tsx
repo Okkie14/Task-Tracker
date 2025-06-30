@@ -1,25 +1,38 @@
 "use client";
 
-import { useTaskDetails } from "@/hooks/useQueryHooks";
 import { Card, CardHeader, CardTitle } from "./ui/card";
-import LoadingCards from "./LoadingCards";
-import ErrorCard from "./ErrorCard";
+import { memo } from "react";
+import { Task } from "@/types";
+import { Skeleton } from "./ui/skeleton";
 
-export default function TaskStats() {
-	const { data, isLoading, isFetching, isError, error } = useTaskDetails();
+function TaskStats({ filteredTasks }: { filteredTasks: Task[] | undefined }) {
+	const totalTasks = filteredTasks?.length;
+	const completed = filteredTasks?.filter((task) => task.completed).length;
 
-	if (isLoading || isFetching) {
-		return (
-			<LoadingCards
-				total={4}
-				containerClass="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
-			/>
-		);
-	}
+	const now = new Date();
+	now.setHours(0, 0, 0, 0);
 
-	if (isError) {
-		return <ErrorCard message={error?.message} />;
-	}
+	// Pending: not completed and due today or in the future
+	const pending = filteredTasks?.filter((task) => {
+		if (task.completed) return false;
+
+		const dueDate = new Date(task.dueDate);
+		dueDate.setHours(0, 0, 0, 0);
+
+		// Due today or in the future
+		return dueDate >= now;
+	}).length;
+
+	const overdue = filteredTasks?.filter((task) => {
+		if (task.completed) return false;
+
+		const dueDate = new Date(task.dueDate);
+		dueDate.setHours(0, 0, 0, 0);
+
+		// Due before today
+		return dueDate < now;
+	}).length;
+
 	return (
 		<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 			<Card className="bg-blue-50 border border-blue-200">
@@ -27,9 +40,14 @@ export default function TaskStats() {
 					<CardTitle className="text-sm text-blue-600">
 						Total Tasks
 					</CardTitle>
-					<p className="text-2xl font-bold text-blue-700">
-						{data?.total}
-					</p>
+
+					{totalTasks === undefined ? (
+						<Skeleton className="h-8 w-6 mx-auto bg-blue-700" />
+					) : (
+						<p className="text-2xl font-bold text-blue-700">
+							{totalTasks}
+						</p>
+					)}
 				</CardHeader>
 			</Card>
 			<Card className="bg-green-50 border border-green-200">
@@ -37,9 +55,13 @@ export default function TaskStats() {
 					<CardTitle className="text-sm text-green-600">
 						Completed
 					</CardTitle>
-					<p className="text-2xl font-bold text-green-700">
-						{data?.completed}
-					</p>
+					{completed === undefined ? (
+						<Skeleton className="h-8 w-6 mx-auto bg-green-700" />
+					) : (
+						<p className="text-2xl font-bold text-green-700">
+							{completed}
+						</p>
+					)}
 				</CardHeader>
 			</Card>
 			<Card className="bg-orange-50 border border-orange-200">
@@ -47,9 +69,13 @@ export default function TaskStats() {
 					<CardTitle className="text-sm text-orange-600">
 						Pending
 					</CardTitle>
-					<p className="text-2xl font-bold text-orange-700">
-						{data?.pending}
-					</p>
+					{pending === undefined ? (
+						<Skeleton className="h-8 w-6 mx-auto bg-orange-700" />
+					) : (
+						<p className="text-2xl font-bold text-orange-700">
+							{pending}
+						</p>
+					)}
 				</CardHeader>
 			</Card>
 			<Card className="bg-red-50 border border-red-200">
@@ -57,11 +83,17 @@ export default function TaskStats() {
 					<CardTitle className="text-sm text-red-600">
 						Overdue
 					</CardTitle>
-					<p className="text-2xl font-bold text-red-700">
-						{data?.overdue}
-					</p>
+					{overdue === undefined ? (
+						<Skeleton className="h-8 w-6 mx-auto bg-red-700" />
+					) : (
+						<p className="text-2xl font-bold text-red-700">
+							{overdue}
+						</p>
+					)}
 				</CardHeader>
 			</Card>
 		</div>
 	);
 }
+
+export default memo(TaskStats);

@@ -21,7 +21,7 @@ import DateDisplay from "./DateDisplay";
 interface TaskDetailViewProps {
 	isOpen: boolean;
 	onClose: () => void;
-	task: Task | null;
+	task: Task;
 	onEdit: (task: Task) => void;
 }
 
@@ -31,8 +31,6 @@ export default function TaskViewDetails({
 	task,
 	onEdit,
 }: TaskDetailViewProps) {
-	if (!task) return null;
-
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const { localCompleted, toggleCompleted } = useToggleTaskCompleted(

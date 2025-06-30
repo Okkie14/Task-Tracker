@@ -17,12 +17,6 @@ import {
 } from "@clerk/nextjs";
 import TaskModal from "@/components/TaskModal";
 import TaskViewDetails from "@/components/TaskViewDetails";
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from "@/components/ui/accordion";
 
 const priorityOrder: Record<string, number> = {
 	high: 1,
@@ -91,9 +85,6 @@ export default function Home() {
 			return priorityOrder[a.priority] - priorityOrder[b.priority];
 		});
 
-	const incompleteTasks = filteredTasks?.filter((task) => !task.completed);
-	const completedTasks = filteredTasks?.filter((task) => task.completed);
-
 	return (
 		<main className="min-h-screen bg-background">
 			<section className="container mx-auto px-4 py-8">
@@ -134,7 +125,7 @@ export default function Home() {
 				</SignedOut>
 				<SignedIn>
 					{/* Stats */}
-					<TaskStats />
+					<TaskStats filteredTasks={filteredTasks} />
 					{/* Filters */}
 					<FilterBar
 						searchQuery={searchQuery}
@@ -166,86 +157,20 @@ export default function Home() {
 								</Button>
 							</div>
 						) : (
-							<Accordion
-								type="single"
-								collapsible
-								defaultValue="incomplete"
-								className="w-full mt-6"
-							>
-								{/* Incomplete Tasks Section */}
-								<AccordionItem value="incomplete">
-									<AccordionTrigger className="hover:cursor-pointer">
-										Incomplete Tasks (
-										{incompleteTasks?.length})
-									</AccordionTrigger>
-									<AccordionContent>
-										{incompleteTasks?.length === 0 ? (
-											<p className="text-muted-foreground">
-												No incomplete tasks.
-											</p>
-										) : (
-											<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-												{incompleteTasks?.map(
-													(task) => (
-														<TaskCard
-															key={task.id}
-															task={task}
-															onEdit={
-																handleEditTask
-															}
-															onClick={
-																setSelectedTask
-															}
-															isLoading={
-																isLoading
-															}
-															isFetching={
-																isFetching
-															}
-															isError={isError}
-															message={
-																error?.message
-															}
-														/>
-													)
-												)}
-											</div>
-										)}
-									</AccordionContent>
-								</AccordionItem>
-
-								{/* Completed Tasks Section */}
-								<AccordionItem value="completed">
-									<AccordionTrigger className="hover:cursor-pointer">
-										Completed Tasks (
-										{completedTasks?.length})
-									</AccordionTrigger>
-									<AccordionContent>
-										{completedTasks?.length === 0 ? (
-											<p className="text-muted-foreground">
-												No completed tasks yet.
-											</p>
-										) : (
-											<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-												{completedTasks?.map((task) => (
-													<TaskCard
-														key={task.id}
-														task={task}
-														onEdit={handleEditTask}
-														onClick={
-															setSelectedTask
-														}
-														isLoading={isLoading}
-														isFetching={isFetching}
-														isError={isError}
-														message={error?.message}
-													/>
-												))}
-											</div>
-										)}
-									</AccordionContent>
-								</AccordionItem>
-							</Accordion>
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+								{filteredTasks?.map((task) => (
+									<TaskCard
+										key={task.id}
+										task={task}
+										onEdit={handleEditTask}
+										onClick={setSelectedTask}
+										isLoading={isLoading}
+										isFetching={isFetching}
+										isError={isError}
+										message={error?.message}
+									/>
+								))}
+							</div>
 						)}
 					</div>
 				</SignedIn>
@@ -264,12 +189,14 @@ export default function Home() {
 				task={editingTask || undefined}
 			/>
 
-			<TaskViewDetails
-				isOpen={!!selectedTask}
-				onClose={() => setSelectedTask(null)}
-				task={selectedTask || null}
-				onEdit={handleEditTask}
-			/>
+			{selectedTask && (
+				<TaskViewDetails
+					isOpen={!!selectedTask}
+					onClose={() => setSelectedTask(null)}
+					task={selectedTask}
+					onEdit={handleEditTask}
+				/>
+			)}
 		</main>
 	);
 }
