@@ -14,10 +14,9 @@ import { formatDatabaseDate } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
 import UserAvatar from "./UserAvatar";
 import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
-import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
+import { handleDeleteTask, useToggleTaskCompleted } from "@/utils/taskUtils";
 import PriorityBadge from "./PriorityBadge";
 import DateDisplay from "./DateDisplay";
-import { useState } from "react";
 
 interface TaskDetailViewProps {
 	isOpen: boolean;
@@ -34,9 +33,12 @@ export default function TaskViewDetails({
 }: TaskDetailViewProps) {
 	if (!task) return null;
 
-	const [localCompleted, setLocalCompleted] = useState(task.completed);
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
+	const { localCompleted, toggleCompleted } = useToggleTaskCompleted(
+		task,
+		updateCompleted
+	);
 
 	const handleEdit = () => {
 		onEdit(task);
@@ -48,17 +50,6 @@ export default function TaskViewDetails({
 		onClose();
 	};
 
-	const toggleCompleted = (taskId: string, currentCompleted: boolean) => {
-		toggleTaskCompleted({
-			updateCompleted,
-			taskId,
-			currentCompleted,
-			taskTitle: task.title,
-			setLocalCompleted,
-		});
-		onClose();
-	};
-
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-[600px]">
@@ -67,9 +58,10 @@ export default function TaskViewDetails({
 						<div className="flex items-center space-x-3 flex-1">
 							<Checkbox
 								checked={localCompleted}
-								onCheckedChange={() =>
-									toggleCompleted(task.id, task.completed)
-								}
+								onCheckedChange={() => {
+									toggleCompleted();
+									onClose();
+								}}
 								className="mt-1 hover:cursor-pointer"
 							/>
 							<div className="flex-1">
