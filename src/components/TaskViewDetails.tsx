@@ -54,6 +54,8 @@ export default function TaskViewDetails({
 		onClose();
 	};
 
+	console.log(task);
+
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>
 			<DialogContent className="sm:max-w-[600px]">
@@ -77,6 +79,17 @@ export default function TaskViewDetails({
 								>
 									{task.title}
 								</DialogTitle>
+								<p
+									className={
+										task.completed
+											? "text-green-500"
+											: "text-blue-500"
+									}
+								>
+									{task.completed
+										? "Completed"
+										: "Not Completed"}
+								</p>
 							</div>
 						</div>
 						<div className="flex space-x-2">

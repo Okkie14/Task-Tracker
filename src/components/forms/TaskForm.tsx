@@ -38,7 +38,7 @@ export default function TaskForm({
 	task,
 }: // users,
 TaskModalProps) {
-	const { data, isLoading, isPending, isError, error } = useGetClerkUsers();
+	const { data } = useGetClerkUsers();
 	const form = useCreateTaskForm();
 
 	// Reset form values on task or open change
@@ -47,13 +47,17 @@ TaskModalProps) {
 			form.reset({
 				title: task.title,
 				description: task.description,
-				priority: task.priority,
+				priority: task.priority.toLowerCase(),
 				dueDate: task.dueDate,
 				assignedTo: task.assignedTo,
 			});
 
 			// Force the field to update
 			setTimeout(() => {
+				form.setValue("priority", task.priority.toLowerCase(), {
+					shouldValidate: true,
+					shouldDirty: true,
+				});
 				form.setValue("assignedTo", task.assignedTo, {
 					shouldValidate: true,
 					shouldDirty: true,
@@ -137,7 +141,7 @@ TaskModalProps) {
 										value={field.value}
 									>
 										<SelectTrigger className="w-full">
-											<SelectValue />
+											<SelectValue placeholder="Select priority" />
 										</SelectTrigger>
 										<SelectContent className="w-full">
 											<SelectItem value="high">

@@ -2,9 +2,24 @@
 
 import { useTaskDetails } from "@/hooks/useQueryHooks";
 import { Card, CardHeader, CardTitle } from "./ui/card";
+import LoadingCards from "./LoadingCards";
+import ErrorCard from "./ErrorCard";
 
 export default function TaskStats() {
 	const { data, isLoading, isFetching, isError, error } = useTaskDetails();
+
+	if (isLoading || isFetching) {
+		return (
+			<LoadingCards
+				total={4}
+				containerClass="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6"
+			/>
+		);
+	}
+
+	if (isError) {
+		return <ErrorCard message={error?.message} />;
+	}
 	return (
 		<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 			<Card className="bg-blue-50 border border-blue-200">

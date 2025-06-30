@@ -7,7 +7,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 export const useGetClerkUsers = () => {
     return useQuery({
         queryKey: ['users'],
-        queryFn: () => fetchUsers()
+        queryFn: () => fetchUsers(),
+        staleTime: 1000 * 60 * 30,
     })
 }
 
@@ -70,6 +71,7 @@ export function useUpdateTaskCompleted() {
 
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["tasks"] });
+            queryClient.invalidateQueries({ queryKey: ["taskDetails"] });
         },
 });
 }

@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Dispatch, SetStateAction } from "react";
-import { useGetClerkUsers } from "@/hooks/useQueryHooks";
+import UserNamesSelect from "./UserNamesSelect";
 
 type FilterBarProps = {
 	searchQuery: string;
@@ -33,7 +33,6 @@ export default function FilterBar({
 	userFilter,
 	setUserFilter,
 }: FilterBarProps) {
-	const { data } = useGetClerkUsers();
 	return (
 		<section className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/30 rounded-lg">
 			<div className="relative flex-1">
@@ -74,15 +73,10 @@ export default function FilterBar({
 
 				<Select value={userFilter} onValueChange={setUserFilter}>
 					<SelectTrigger className="w-[150px]">
-						<SelectValue />
+						<SelectValue placeholder="All Users" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="all">All Users</SelectItem>
-						{data?.data?.map((users: any) => (
-							<SelectItem key={users.id} value={users.id}>
-								{users.firstName} {users.lastName}
-							</SelectItem>
-						))}
+						<UserNamesSelect />
 					</SelectContent>
 				</Select>
 			</div>

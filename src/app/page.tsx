@@ -1,6 +1,6 @@
 "use client";
 
-import { useCreateNewTask, useGetAllTasks } from "@/hooks/useQueryHooks";
+import { useGetAllTasks } from "@/hooks/useQueryHooks";
 import { Task } from "@/types";
 import { useState } from "react";
 import TaskCard from "@/components/TaskCard";
@@ -12,14 +12,15 @@ import {
 	SignedIn,
 	SignedOut,
 	SignInButton,
+	SignUp,
 	UserButton,
-	useUser,
 } from "@clerk/nextjs";
 import TaskModal from "@/components/TaskModal";
 import TaskViewDetails from "@/components/TaskViewDetails";
+import LoadingCards from "@/components/LoadingCards";
 
 export default function Home() {
-	const { data } = useGetAllTasks();
+	const { data, isLoading, isFetching, isError, error } = useGetAllTasks();
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 	const [editingTask, setEditingTask] = useState<Task | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -93,49 +94,62 @@ export default function Home() {
 						</SignedIn>
 					</div>
 				</div>
-				{/* Stats */}
-				<TaskStats />
-				{/* Filters */}
-				<FilterBar
-					searchQuery={searchQuery}
-					setSearchQuery={setSearchQuery}
-					statusFilter={statusFilter}
-					setStatusFilter={setStatusFilter}
-					priorityFilter={priorityFilter}
-					setPriorityFilter={setPriorityFilter}
-					userFilter={userFilter}
-					setUserFilter={setUserFilter}
-				/>
-				{/* Task Grid */}
-				<div className="mt-6">
-					{data?.length === 0 ? (
-						<div className="text-center py-12">
-							<CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-							<h3 className="text-lg font-medium text-muted-foreground mb-2">
-								No tasks yet
-							</h3>
-							<p className="text-muted-foreground mb-4">
-								Create your first task to get started
-							</p>
+				<SignedOut>
+					<section className="flex justify-center items-center">
+						<SignUp />
+					</section>
+				</SignedOut>
+				<SignedIn>
+					{/* Stats */}
+					<TaskStats />
+					{/* Filters */}
+					<FilterBar
+						searchQuery={searchQuery}
+						setSearchQuery={setSearchQuery}
+						statusFilter={statusFilter}
+						setStatusFilter={setStatusFilter}
+						priorityFilter={priorityFilter}
+						setPriorityFilter={setPriorityFilter}
+						userFilter={userFilter}
+						setUserFilter={setUserFilter}
+					/>
+					{/* Task Grid */}
+					<div className="mt-6">
+						{data?.length === 0 ? (
+							<div className="text-center py-12">
+								<CheckSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+								<h3 className="text-lg font-medium text-muted-foreground mb-2">
+									No tasks yet
+								</h3>
+								<p className="text-muted-foreground mb-4">
+									Create your first task to get started
+								</p>
 
-							<Button onClick={() => setIsCreateModalOpen(true)}>
-								<Plus className="h-4 w-4 mr-2" />
-								Create Task
-							</Button>
-						</div>
-					) : (
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-							{filteredTasks?.map((task) => (
-								<TaskCard
-									key={task.id}
-									task={task}
-									onEdit={handleEditTask}
-									onClick={setSelectedTask}
-								/>
-							))}
-						</div>
-					)}
-				</div>
+								<Button
+									onClick={() => setIsCreateModalOpen(true)}
+								>
+									<Plus className="h-4 w-4 mr-2" />
+									Create Task
+								</Button>
+							</div>
+						) : (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+								{filteredTasks?.map((task) => (
+									<TaskCard
+										key={task.id}
+										task={task}
+										onEdit={handleEditTask}
+										onClick={setSelectedTask}
+										isLoading={isLoading}
+										isFetching={isFetching}
+										isError={isError}
+										message={error?.message}
+									/>
+								))}
+							</div>
+						)}
+					</div>
+				</SignedIn>
 			</section>
 			{/* Modals */}
 			<TaskModal

@@ -14,18 +14,31 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate, isOverdue, getDaysUntilDue } from "@/utils/dateUtils";
 import { Calendar, MoreVertical } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
 import { getPriorityColor } from "@/utils/getPriorityColors";
 import UserAvatar from "./UserAvatar";
+import LoadingCards from "./LoadingCards";
+import ErrorCard from "./ErrorCard";
 
 interface TaskCardProps {
 	task: Task;
 	onEdit: (task: Task) => void;
 	onClick: (task: Task) => void;
+	isLoading: boolean;
+	isFetching: boolean;
+	isError: boolean;
+	message?: string;
 }
 
-export default function TaskCard({ task, onEdit, onClick }: TaskCardProps) {
+export default function TaskCard({
+	task,
+	onEdit,
+	onClick,
+	isLoading,
+	isFetching,
+	isError,
+	message,
+}: TaskCardProps) {
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const overdue = task.dueDate && isOverdue(task.dueDate);
@@ -42,10 +55,21 @@ export default function TaskCard({ task, onEdit, onClick }: TaskCardProps) {
 		updateCompleted({ id: taskId, completed: !currentCompleted });
 	};
 
+	if (isLoading || isFetching) {
+		return (
+			<LoadingCards
+				skeletonClass="h-48 w-full" // or a fixed width like w-64
+				total={1}
+			/>
+		);
+	}
+
+	if (isError) return <ErrorCard message={message} />;
+
 	return (
 		<Card
 			className={cn(
-				"transition-all duration-200 hover:shadow-md cursor-pointer group",
+				"transition-all duration-200 hover:shadow-md cursor-pointer group h-48",
 				task.completed && "opacity-50",
 				overdue && !task.completed && "border-red-300 bg-red-50/30"
 			)}
@@ -91,7 +115,12 @@ export default function TaskCard({ task, onEdit, onClick }: TaskCardProps) {
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end">
-								<DropdownMenuItem onClick={() => onEdit(task)}>
+								<DropdownMenuItem
+									onClick={(e) => {
+										e.stopPropagation();
+										onEdit(task);
+									}}
+								>
 									Edit Task
 								</DropdownMenuItem>
 								<DropdownMenuItem
@@ -106,7 +135,7 @@ export default function TaskCard({ task, onEdit, onClick }: TaskCardProps) {
 				</div>
 			</CardHeader>
 
-			<CardContent className="pt-0">
+			<CardContent className="mt-auto">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center space-x-4">
 						<Badge
