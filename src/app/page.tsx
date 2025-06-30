@@ -16,6 +16,7 @@ import {
 	useUser,
 } from "@clerk/nextjs";
 import TaskModal from "@/components/TaskModal";
+import TaskViewDetails from "@/components/TaskViewDetails";
 
 export default function Home() {
 	const { data } = useGetAllTasks();
@@ -106,7 +107,6 @@ export default function Home() {
 				isOpen={isCreateModalOpen}
 				onClose={() => setIsCreateModalOpen(false)}
 				isEdit={editingTask !== null}
-				// users={users}
 			/>
 
 			<TaskModal
@@ -114,7 +114,13 @@ export default function Home() {
 				onClose={closeEditModal}
 				isEdit={editingTask !== null}
 				task={editingTask || undefined}
-				// users={users}
+			/>
+
+			<TaskViewDetails
+				isOpen={!!selectedTask}
+				onClose={() => setSelectedTask(null)}
+				task={selectedTask || null}
+				onEdit={handleEditTask}
 			/>
 		</main>
 	);

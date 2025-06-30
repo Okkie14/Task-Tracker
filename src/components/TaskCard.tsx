@@ -10,26 +10,14 @@ import {
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { formatDate, isOverdue, getDaysUntilDue } from "@/utils/dateUtils";
 import { Calendar, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
-
-const getPriorityColor = (priority: Task["priority"]) => {
-	switch (priority) {
-		case "high":
-			return "bg-red-100 text-red-800 border-red-200";
-		case "medium":
-			return "bg-orange-100 text-orange-800 border-orange-200";
-		case "low":
-			return "bg-blue-100 text-blue-800 border-blue-200";
-		default:
-			return "bg-gray-100 text-gray-800 border-gray-200";
-	}
-};
+import { getPriorityColor } from "@/utils/getPriorityColors";
+import UserAvatar from "./UserAvatar";
 
 interface TaskCardProps {
 	task: Task;
@@ -48,46 +36,6 @@ TaskCardProps) {
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const overdue = task.dueDate && isOverdue(task.dueDate);
 	const daysUntilDue = task.dueDate ? getDaysUntilDue(task.dueDate) : null;
-	const [userName, setUserName] = useState<string>("");
-	const [initials, setInitials] = useState<string>("");
-
-	useEffect(() => {
-		const fetchUser = async () => {
-			if (!task.assignedTo) return;
-
-			const cacheKey = `user_${task.assignedTo}`;
-			const cached = localStorage.getItem(cacheKey);
-
-			if (cached) {
-				const parsed = JSON.parse(cached);
-				setUserName(parsed.name);
-				setInitials(parsed.initials);
-				return;
-			}
-
-			try {
-				const res = await fetch(`/api/user/${task.assignedTo}`);
-				if (!res.ok) throw new Error("Network response was not ok");
-
-				const data = await res.json();
-				setUserName(data.name);
-				setInitials(data.initials);
-
-				// Cache in localStorage
-				localStorage.setItem(
-					cacheKey,
-					JSON.stringify({
-						name: data.name,
-						initials: data.initials,
-					})
-				);
-			} catch (err) {
-				console.error("Error fetching user:", err);
-			}
-		};
-
-		fetchUser();
-	}, [task.assignedTo]);
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if ((e.target as HTMLElement).closest("[data-no-propagation]")) {
@@ -206,17 +154,7 @@ TaskCardProps) {
 					</div>
 
 					{task.assignedTo && (
-						<div className="flex items-center space-x-2">
-							<Avatar className="h-6 w-6">
-								<AvatarFallback className="text-xs">
-									{initials ||
-										task.assignedTo
-											.substring(0, 2)
-											.toUpperCase()}
-								</AvatarFallback>
-							</Avatar>
-							{userName && <span>{userName}</span>}
-						</div>
+						<UserAvatar assignedTo={task.assignedTo} />
 					)}
 				</div>
 			</CardContent>

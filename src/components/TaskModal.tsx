@@ -1,5 +1,4 @@
 "use client";
-import { useState, useEffect } from "react";
 import { Task, CreateFormData } from "@/types";
 import {
 	Dialog,
@@ -7,13 +6,7 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-
-import {
-	useCreateNewTask,
-	useGetClerkUsers,
-	useUpdateTask,
-} from "@/hooks/useQueryHooks";
-import { useCreateTaskForm } from "@/hooks/useForm";
+import { useCreateNewTask, useUpdateTask } from "@/hooks/useQueryHooks";
 import { useUser } from "@clerk/nextjs";
 import TaskForm from "./forms/TaskForm";
 import { toast } from "sonner";
@@ -23,7 +16,6 @@ type TaskModalProps = {
 	onClose: () => void;
 	isEdit: boolean;
 	task?: Task;
-	// users: User[];
 };
 
 export default function TaskModal({
@@ -31,8 +23,7 @@ export default function TaskModal({
 	onClose,
 	isEdit,
 	task,
-}: // users,
-TaskModalProps) {
+}: TaskModalProps) {
 	const { mutateAsync } = useCreateNewTask();
 	const { mutateAsync: mutateUpdate } = useUpdateTask();
 	const user = useUser();
