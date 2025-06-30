@@ -8,18 +8,18 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { formatDate, isOverdue, getDaysUntilDue } from "@/utils/dateUtils";
-import { Calendar, MoreVertical } from "lucide-react";
+import { isOverdue } from "@/utils/dateUtils";
+import { MoreVertical } from "lucide-react";
 import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
-import { getPriorityColor } from "@/utils/getPriorityColors";
 import UserAvatar from "./UserAvatar";
 import LoadingCards from "./LoadingCards";
 import ErrorCard from "./ErrorCard";
 import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
+import PriorityBadge from "./PriorityBadge";
+import DateDisplay from "./DateDisplay";
 
 interface TaskCardProps {
 	task: Task;
@@ -43,7 +43,6 @@ export default function TaskCard({
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const overdue = task.dueDate && isOverdue(task.dueDate);
-	const daysUntilDue = task.dueDate ? getDaysUntilDue(task.dueDate) : null;
 
 	const handleCardClick = (e: React.MouseEvent) => {
 		if ((e.target as HTMLElement).closest("[data-no-propagation]")) {
@@ -107,7 +106,7 @@ export default function TaskCard({
 							>
 								{task.title}
 							</h3>
-							<p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+							<p className="text-sm text-muted-foreground mt-1 line-clamp-2 whitespace-pre-line">
 								{task.description}
 							</p>
 						</div>
@@ -151,41 +150,15 @@ export default function TaskCard({
 			<CardContent className="mt-auto">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center space-x-4">
-						<Badge
-							variant="outline"
-							className={getPriorityColor(task.priority)}
-						>
-							{task.priority}
-						</Badge>
+						<PriorityBadge priority={task.priority} />
 
 						{task.dueDate && (
-							<div
-								className={cn(
-									"flex items-center space-x-1 text-xs",
-									overdue && !task.completed
-										? "text-red-600"
-										: "text-muted-foreground"
-								)}
-							>
-								<Calendar className="h-3 w-3" />
-								<span>{formatDate(task.dueDate)}</span>
-								{daysUntilDue !== null && !task.completed && (
-									<span
-										className={cn(
-											"ml-1 px-1.5 py-0.5 rounded text-xs font-medium",
-											overdue
-												? "bg-red-100 text-red-700"
-												: daysUntilDue <= 3
-												? "bg-orange-100 text-orange-700"
-												: "bg-gray-100 text-gray-600"
-										)}
-									>
-										{overdue
-											? "Overdue"
-											: `${daysUntilDue}d left`}
-									</span>
-								)}
-							</div>
+							<DateDisplay
+								dueDate={task.dueDate}
+								completed={task.completed}
+								imageSize="3"
+								shortHand={true}
+							/>
 						)}
 					</div>
 

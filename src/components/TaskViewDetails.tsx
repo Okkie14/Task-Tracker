@@ -7,21 +7,16 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, Edit, Trash2 } from "lucide-react";
-import {
-	formatDate,
-	isOverdue,
-	getDaysUntilDue,
-	formatDatabaseDate,
-} from "@/utils/dateUtils";
+import { Clock, Edit, Trash2 } from "lucide-react";
+import { formatDatabaseDate } from "@/utils/dateUtils";
 import { cn } from "@/lib/utils";
-import { getPriorityColor } from "@/utils/getPriorityColors";
 import UserAvatar from "./UserAvatar";
 import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
 import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
+import PriorityBadge from "./PriorityBadge";
+import DateDisplay from "./DateDisplay";
 
 interface TaskDetailViewProps {
 	isOpen: boolean;
@@ -39,8 +34,6 @@ export default function TaskViewDetails({
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	if (!task) return null;
-	const overdue = task.dueDate && isOverdue(task.dueDate);
-	const daysUntilDue = task.dueDate ? getDaysUntilDue(task.dueDate) : null;
 
 	const handleEdit = () => {
 		onEdit(task);
@@ -127,7 +120,7 @@ export default function TaskViewDetails({
 							<h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide mb-2">
 								Description
 							</h4>
-							<p className="text-base leading-relaxed">
+							<p className="text-base leading-relaxed whitespace-pre-line">
 								{task.description}
 							</p>
 						</div>
@@ -137,12 +130,7 @@ export default function TaskViewDetails({
 								<h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide mb-2">
 									Priority
 								</h4>
-								<Badge
-									variant="outline"
-									className={getPriorityColor(task.priority)}
-								>
-									{task.priority}
-								</Badge>
+								<PriorityBadge priority={task.priority} />
 							</div>
 
 							{task.dueDate && (
@@ -150,35 +138,12 @@ export default function TaskViewDetails({
 									<h4 className="font-medium text-sm text-muted-foreground uppercase tracking-wide mb-2">
 										Due Date
 									</h4>
-									<div className="flex items-center space-x-2">
-										<Calendar className="h-4 w-4 text-muted-foreground" />
-										<span
-											className={cn(
-												overdue && !task.completed
-													? "text-red-600 font-medium"
-													: "text-foreground"
-											)}
-										>
-											{formatDate(task.dueDate)}
-										</span>
-										{daysUntilDue !== null &&
-											!task.completed && (
-												<span
-													className={cn(
-														"px-2 py-1 rounded text-xs font-medium",
-														overdue
-															? "bg-red-100 text-red-700"
-															: daysUntilDue <= 3
-															? "bg-orange-100 text-orange-700"
-															: "bg-gray-100 text-gray-600"
-													)}
-												>
-													{overdue
-														? "Overdue"
-														: `${daysUntilDue} days left`}
-												</span>
-											)}
-									</div>
+									<DateDisplay
+										dueDate={task.dueDate}
+										completed={task.completed}
+										imageSize="4"
+										shortHand={false}
+									/>
 								</div>
 							)}
 						</div>
