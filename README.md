@@ -1,6 +1,6 @@
 # Task Tracker
 
-A simple and modern Task Tracker built with:
+A simple and modern **Task Tracker** built with:
 
 -   **Next.js 15**
 -   **Clerk** for authentication
@@ -21,13 +21,17 @@ A simple and modern Task Tracker built with:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-username/task-tracker.git
+git clone https://github.com/Okkie14/Task-Tracker
 ```
 
-### 2. Clone the repository
+### 2. Install dependencies
 
 ```bash
 pnpm install
+# or
+npm install
+# or
+yarn install
 ```
 
 ### 3. Set up environment variables
@@ -53,6 +57,10 @@ npx drizzle-kit push
 
 ```bash
 pnpm dev
+# or
+npm run dev
+# or
+yarn dev
 ```
 
 Open http://localhost:3000 in your browser.
