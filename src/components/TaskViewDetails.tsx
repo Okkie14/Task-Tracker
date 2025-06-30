@@ -1,3 +1,5 @@
+"use client";
+
 import { Task } from "@/types";
 import {
 	Dialog,
@@ -8,7 +10,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar, Clock, User, Edit, Trash2 } from "lucide-react";
+import { Calendar, Clock, Edit, Trash2 } from "lucide-react";
 import {
 	formatDate,
 	isOverdue,
@@ -19,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { getPriorityColor } from "@/utils/getPriorityColors";
 import UserAvatar from "./UserAvatar";
 import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
+import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
 
 interface TaskDetailViewProps {
 	isOpen: boolean;
@@ -45,16 +48,19 @@ export default function TaskViewDetails({
 	};
 
 	const handleDelete = () => {
-		mutateAsync(task.id);
+		handleDeleteTask(mutateAsync, task.id, task.title);
 		onClose();
 	};
 
 	const toggleCompleted = (taskId: string, currentCompleted: boolean) => {
-		updateCompleted({ id: taskId, completed: !currentCompleted });
+		toggleTaskCompleted({
+			updateCompleted,
+			taskId,
+			currentCompleted,
+			taskTitle: task.title,
+		});
 		onClose();
 	};
-
-	console.log(task);
 
 	return (
 		<Dialog open={isOpen} onOpenChange={onClose}>

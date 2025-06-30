@@ -19,6 +19,7 @@ import { getPriorityColor } from "@/utils/getPriorityColors";
 import UserAvatar from "./UserAvatar";
 import LoadingCards from "./LoadingCards";
 import ErrorCard from "./ErrorCard";
+import { handleDeleteTask, toggleTaskCompleted } from "@/utils/taskUtils";
 
 interface TaskCardProps {
 	task: Task;
@@ -52,7 +53,16 @@ export default function TaskCard({
 	};
 
 	const toggleCompleted = (taskId: string, currentCompleted: boolean) => {
-		updateCompleted({ id: taskId, completed: !currentCompleted });
+		toggleTaskCompleted({
+			updateCompleted,
+			taskId,
+			currentCompleted,
+			taskTitle: task.title,
+		});
+	};
+
+	const handleDelete = (id: string) => {
+		handleDeleteTask(mutateAsync, id, task.title);
 	};
 
 	if (isLoading || isFetching) {
@@ -125,7 +135,10 @@ export default function TaskCard({
 								</DropdownMenuItem>
 								<DropdownMenuItem
 									className="text-red-600"
-									onClick={() => mutateAsync(task.id)}
+									onClick={(e) => {
+										e.stopPropagation();
+										handleDelete(task.id);
+									}}
 								>
 									Delete Task
 								</DropdownMenuItem>

@@ -36,13 +36,30 @@ export default function TaskModal({
 				clerkUserId: clerkUserId ?? "",
 				completed: false,
 			};
-			mutateAsync(newData);
+			mutateAsync(newData, {
+				onSuccess: () => {
+					toast.success(`${taskData.title} created successfully`);
+				},
+				onError: () => {
+					toast.error("Error creating task");
+				},
+			});
 		} else if (isEdit) {
 			if (!task) {
 				toast.warning("Task not found");
 				return;
 			}
-			mutateUpdate({ id: task.id, updates: taskData });
+			mutateUpdate(
+				{ id: task.id, updates: taskData },
+				{
+					onSuccess: () => {
+						toast.success(`${taskData.title} updated successfully`);
+					},
+					onError: () => {
+						toast.error("Error updating task");
+					},
+				}
+			);
 		}
 	};
 

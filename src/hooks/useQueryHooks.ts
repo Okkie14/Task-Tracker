@@ -27,6 +27,7 @@ export const useCreateNewTask = () => {
         onSuccess: () => {
             // Invalidate or refetch tasks list after creation
             queryClient.invalidateQueries({ queryKey:["tasks"]});
+            queryClient.invalidateQueries({ queryKey: ["taskDetails"] });
         },
     });
 }
@@ -58,6 +59,7 @@ export const useDeleteTask = () => {
         onSuccess: () => {
             // Invalidate or refetch tasks list after creation
             queryClient.invalidateQueries({ queryKey:["tasks"]});
+            queryClient.invalidateQueries({ queryKey: ["taskDetails"] });
         },
     });
 }
