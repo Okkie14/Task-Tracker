@@ -15,7 +15,9 @@ export const useGetClerkUsers = () => {
 export const useGetAllTasks = () => {
     return useQuery<Task[]>({
         queryKey: ['tasks'],
-        queryFn: () => getAllTask()
+        queryFn: () => getAllTask(),
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
     })
 }
 
