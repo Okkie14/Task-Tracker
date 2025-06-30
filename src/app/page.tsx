@@ -24,6 +24,12 @@ import {
 	AccordionTrigger,
 } from "@/components/ui/accordion";
 
+const priorityOrder: Record<string, number> = {
+	high: 1,
+	medium: 2,
+	low: 3,
+};
+
 export default function Home() {
 	const { data, isLoading, isFetching, isError, error } = useGetAllTasks();
 	const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
@@ -45,26 +51,45 @@ export default function Home() {
 	};
 
 	// Filtered data
-	const filteredTasks = data?.filter((task) => {
-		const matchesSearch =
-			task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-			task.description.toLowerCase().includes(searchQuery.toLowerCase());
+	const filteredTasks = data
+		?.filter((task) => {
+			const matchesSearch =
+				task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+				task.description
+					.toLowerCase()
+					.includes(searchQuery.toLowerCase());
 
-		const matchesStatus =
-			statusFilter === "all"
-				? true
-				: statusFilter === "completed"
-				? task.completed
-				: !task.completed;
+			const matchesStatus =
+				statusFilter === "all"
+					? true
+					: statusFilter === "completed"
+					? task.completed
+					: !task.completed;
 
-		const matchesPriority =
-			priorityFilter === "all" ? true : task.priority === priorityFilter;
+			const matchesPriority =
+				priorityFilter === "all"
+					? true
+					: task.priority === priorityFilter;
 
-		const matchesUser =
-			userFilter === "all" ? true : task.assignedTo === userFilter;
+			const matchesUser =
+				userFilter === "all" ? true : task.assignedTo === userFilter;
 
-		return matchesSearch && matchesStatus && matchesPriority && matchesUser;
-	});
+			return (
+				matchesSearch && matchesStatus && matchesPriority && matchesUser
+			);
+		})
+		?.sort((a, b) => {
+			// ✅ First: Sort by dueDate (earliest first)
+			const dateA = new Date(a.dueDate).getTime();
+			const dateB = new Date(b.dueDate).getTime();
+
+			if (dateA !== dateB) {
+				return dateA - dateB;
+			}
+
+			// ✅ Then: Sort by priorityOrder (high priority first)
+			return priorityOrder[a.priority] - priorityOrder[b.priority];
+		});
 
 	const incompleteTasks = filteredTasks?.filter((task) => !task.completed);
 	const completedTasks = filteredTasks?.filter((task) => task.completed);
