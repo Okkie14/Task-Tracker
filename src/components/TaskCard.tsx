@@ -22,16 +22,10 @@ import UserAvatar from "./UserAvatar";
 interface TaskCardProps {
 	task: Task;
 	onEdit: (task: Task) => void;
-	// onDelete: (taskId: string) => void;
 	onClick: (task: Task) => void;
 }
 
-export default function TaskCard({
-	task,
-	onEdit,
-	onClick,
-}: // onDelete,
-TaskCardProps) {
+export default function TaskCard({ task, onEdit, onClick }: TaskCardProps) {
 	const { mutateAsync } = useDeleteTask();
 	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const overdue = task.dueDate && isOverdue(task.dueDate);

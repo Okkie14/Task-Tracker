@@ -92,9 +92,7 @@ export default function Home() {
 								<TaskCard
 									key={task.id}
 									task={task}
-									// onToggleComplete={toggleTaskComplete}
 									onEdit={handleEditTask}
-									// onDelete={deleteTask}
 									onClick={setSelectedTask}
 								/>
 							))}
