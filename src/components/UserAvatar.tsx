@@ -42,6 +42,7 @@ export default function UserAvatar({ assignedTo }: { assignedTo: string }) {
 
 		fetchUser();
 	}, [assignedTo]);
+
 	return (
 		<div className="flex items-center space-x-2">
 			<Avatar className="h-6 w-6">

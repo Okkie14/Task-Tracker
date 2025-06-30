@@ -24,6 +24,12 @@ export default function Home() {
 	const [editingTask, setEditingTask] = useState<Task | null>(null);
 	const [selectedTask, setSelectedTask] = useState<Task | null>(null);
 
+	// Filter states
+	const [searchQuery, setSearchQuery] = useState("");
+	const [statusFilter, setStatusFilter] = useState("all");
+	const [priorityFilter, setPriorityFilter] = useState("all");
+	const [userFilter, setUserFilter] = useState("all");
+
 	const handleEditTask = (task: Task) => {
 		setEditingTask(task);
 	};
@@ -31,6 +37,28 @@ export default function Home() {
 	const closeEditModal = () => {
 		setEditingTask(null);
 	};
+
+	// Filtered data
+	const filteredTasks = data?.filter((task) => {
+		const matchesSearch =
+			task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+			task.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+		const matchesStatus =
+			statusFilter === "all"
+				? true
+				: statusFilter === "completed"
+				? task.completed
+				: !task.completed;
+
+		const matchesPriority =
+			priorityFilter === "all" ? true : task.priority === priorityFilter;
+
+		const matchesUser =
+			userFilter === "all" ? true : task.assignedTo === userFilter;
+
+		return matchesSearch && matchesStatus && matchesPriority && matchesUser;
+	});
 
 	return (
 		<main className="min-h-screen bg-background">
@@ -68,7 +96,16 @@ export default function Home() {
 				{/* Stats */}
 				<TaskStats />
 				{/* Filters */}
-				<FilterBar />
+				<FilterBar
+					searchQuery={searchQuery}
+					setSearchQuery={setSearchQuery}
+					statusFilter={statusFilter}
+					setStatusFilter={setStatusFilter}
+					priorityFilter={priorityFilter}
+					setPriorityFilter={setPriorityFilter}
+					userFilter={userFilter}
+					setUserFilter={setUserFilter}
+				/>
 				{/* Task Grid */}
 				<div className="mt-6">
 					{data?.length === 0 ? (
@@ -88,7 +125,7 @@ export default function Home() {
 						</div>
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-							{data?.map((task) => (
+							{filteredTasks?.map((task) => (
 								<TaskCard
 									key={task.id}
 									task={task}

@@ -1,3 +1,5 @@
+"use client";
+
 import { Search } from "lucide-react";
 import {
 	Select,
@@ -7,16 +9,44 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { Dispatch, SetStateAction } from "react";
+import { useGetClerkUsers } from "@/hooks/useQueryHooks";
 
-export default function FilterBar() {
+type FilterBarProps = {
+	searchQuery: string;
+	setSearchQuery: Dispatch<SetStateAction<string>>;
+	statusFilter: string;
+	setStatusFilter: Dispatch<SetStateAction<string>>;
+	priorityFilter: string;
+	setPriorityFilter: Dispatch<SetStateAction<string>>;
+	userFilter: string;
+	setUserFilter: Dispatch<SetStateAction<string>>;
+};
+
+export default function FilterBar({
+	searchQuery,
+	setSearchQuery,
+	statusFilter,
+	setStatusFilter,
+	priorityFilter,
+	setPriorityFilter,
+	userFilter,
+	setUserFilter,
+}: FilterBarProps) {
+	const { data } = useGetClerkUsers();
 	return (
 		<section className="flex flex-col sm:flex-row gap-4 p-4 bg-muted/30 rounded-lg">
 			<div className="relative flex-1">
 				<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-				<Input placeholder="Search tasks..." className="pl-10" />
+				<Input
+					placeholder="Search tasks..."
+					className="pl-10"
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+				/>
 			</div>
 			<div className="flex gap-3">
-				<Select>
+				<Select value={statusFilter} onValueChange={setStatusFilter}>
 					<SelectTrigger className="w-[130px]">
 						<SelectValue />
 					</SelectTrigger>
@@ -27,7 +57,10 @@ export default function FilterBar() {
 					</SelectContent>
 				</Select>
 
-				<Select>
+				<Select
+					value={priorityFilter}
+					onValueChange={setPriorityFilter}
+				>
 					<SelectTrigger className="w-[130px]">
 						<SelectValue />
 					</SelectTrigger>
@@ -39,14 +72,17 @@ export default function FilterBar() {
 					</SelectContent>
 				</Select>
 
-				<Select>
+				<Select value={userFilter} onValueChange={setUserFilter}>
 					<SelectTrigger className="w-[150px]">
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
 						<SelectItem value="all">All Users</SelectItem>
-						<SelectItem value="user1">User 1</SelectItem>
-						<SelectItem value="user2">User 2</SelectItem>
+						{data?.data?.map((users: any) => (
+							<SelectItem key={users.id} value={users.id}>
+								{users.firstName} {users.lastName}
+							</SelectItem>
+						))}
 					</SelectContent>
 				</Select>
 			</div>
