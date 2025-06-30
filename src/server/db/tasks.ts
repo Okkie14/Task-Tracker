@@ -54,53 +54,68 @@ export async function getAllTask() {
 }
 
 export async function getTaskDetails() {
-    const now = new Date();
-    const nowString = now.toISOString().split('T')[0];
-  
-    // Total tasks count
-    const totalTasksQuery = db.select({ count: sql<number>`count(*)` }).from(Tasks);
-  
-    // Completed tasks count
-    const completedTasksQuery = db
-      .select({ count: sql<number>`count(*)` })
-      .from(Tasks)
-      .where(eq(Tasks.completed, true));
-  
-    // Overdue tasks count (dueDate < now AND not completed)
-    const overdueTasksQuery = db
+  const now = new Date();
+  const nowString = now.toISOString().split('T')[0];
+
+  // Total tasks count
+  const totalTasksQuery = db.select({ count: sql<number>`count(*)` }).from(Tasks);
+
+  // Completed tasks count
+  const completedTasksQuery = db
     .select({ count: sql<number>`count(*)` })
     .from(Tasks)
-    .where(
-        and(
-            lt(Tasks.dueDate, nowString),
-            eq(Tasks.completed, false)
-        )
-    );
+    .where(eq(Tasks.completed, true));
 
-  
-    // Pending tasks count (not completed AND dueDate >= now)
-    const pendingTasksQuery = db
-        .select({ count: sql<number>`count(*)` })
-        .from(Tasks)
-        .where(
-        and(
-            eq(Tasks.completed, false),
-            gte(Tasks.dueDate, nowString)
-        )
-        );
-  
-    // Execute all queries in parallel
-    const [total, completed, overdue, pending] = await Promise.all([
-      totalTasksQuery,
-      completedTasksQuery,
-      overdueTasksQuery,
-      pendingTasksQuery,
-    ]);
-  
-    return {
-      total: total[0].count,
-      completed: completed[0].count,
-      overdue: overdue[0].count,
-      pending: pending[0].count,
-    };
+  // Overdue tasks count (dueDate < now AND not completed)
+  const overdueTasksQuery = db
+  .select({ count: sql<number>`count(*)` })
+  .from(Tasks)
+  .where(
+      and(
+          lt(Tasks.dueDate, nowString),
+          eq(Tasks.completed, false)
+      )
+  );
+
+
+  // Pending tasks count (not completed AND dueDate >= now)
+  const pendingTasksQuery = db
+      .select({ count: sql<number>`count(*)` })
+      .from(Tasks)
+      .where(
+      and(
+          eq(Tasks.completed, false),
+          gte(Tasks.dueDate, nowString)
+      )
+      );
+
+  // Execute all queries in parallel
+  const [total, completed, overdue, pending] = await Promise.all([
+    totalTasksQuery,
+    completedTasksQuery,
+    overdueTasksQuery,
+    pendingTasksQuery,
+  ]);
+
+  return {
+    total: total[0].count,
+    completed: completed[0].count,
+    overdue: overdue[0].count,
+    pending: pending[0].count,
+  };
+}
+
+export async function updateTaskCompleted(id: string, completed: boolean) {
+  try {
+    const result = await db
+      .update(Tasks)
+      .set({ completed, updatedAt: new Date() })
+      .where(eq(Tasks.id, id))
+      .returning();
+
+    return result;
+  } catch (error) {
+    console.error("Failed to update task completion:", error);
+    throw error;
   }
+}

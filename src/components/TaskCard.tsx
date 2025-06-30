@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 import { formatDate, isOverdue, getDaysUntilDue } from "@/utils/dateUtils";
 import { Calendar, MoreVertical } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useDeleteTask } from "@/hooks/useQueryHooks";
+import { useDeleteTask, useUpdateTaskCompleted } from "@/hooks/useQueryHooks";
 
 const getPriorityColor = (priority: Task["priority"]) => {
 	switch (priority) {
@@ -45,6 +45,7 @@ export default function TaskCard({
 }: // onDelete,
 TaskCardProps) {
 	const { mutateAsync } = useDeleteTask();
+	const { mutate: updateCompleted } = useUpdateTaskCompleted();
 	const overdue = task.dueDate && isOverdue(task.dueDate);
 	const daysUntilDue = task.dueDate ? getDaysUntilDue(task.dueDate) : null;
 	const [userName, setUserName] = useState<string>("");
@@ -95,11 +96,15 @@ TaskCardProps) {
 		onClick(task);
 	};
 
+	const toggleCompleted = (taskId: string, currentCompleted: boolean) => {
+		updateCompleted({ id: taskId, completed: !currentCompleted });
+	};
+
 	return (
 		<Card
 			className={cn(
 				"transition-all duration-200 hover:shadow-md cursor-pointer group",
-				task.completed && "opacity-75",
+				task.completed && "opacity-50",
 				overdue && !task.completed && "border-red-300 bg-red-50/30"
 			)}
 			onClick={handleCardClick}
@@ -110,8 +115,10 @@ TaskCardProps) {
 						<div data-no-propagation>
 							<Checkbox
 								checked={task.completed}
-								onCheckedChange={() => {}}
-								className="mt-1"
+								onCheckedChange={() =>
+									toggleCompleted(task.id, task.completed)
+								}
+								className="mt-1 hover:cursor-pointer"
 							/>
 						</div>
 						<div className="flex-1 min-w-0">
@@ -136,6 +143,7 @@ TaskCardProps) {
 									variant="ghost"
 									size="sm"
 									className="opacity-0 group-hover:opacity-100 transition-opacity"
+									disabled={task.completed}
 								>
 									<MoreVertical className="h-4 w-4" />
 								</Button>

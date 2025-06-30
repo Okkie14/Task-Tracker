@@ -10,7 +10,7 @@ export interface Task {
   clerkUserId: string;
   title: string;
   description: string;
-  completed?: boolean;
+  completed: boolean;
   priority: string;
   dueDate: string;
   assignedTo: string;

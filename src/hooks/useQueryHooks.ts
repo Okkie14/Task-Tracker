@@ -1,6 +1,6 @@
 import { fetchUsers } from "@/app/api";
 import { Tasks } from "@/drizzle/schema";
-import { getAllTask, createTask, getTaskDetails, updateTask, deleteTask } from "@/server/db/tasks";
+import { getAllTask, createTask, getTaskDetails, updateTask, deleteTask, updateTaskCompleted } from "@/server/db/tasks";
 import { Task } from "@/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -59,4 +59,17 @@ export const useDeleteTask = () => {
             queryClient.invalidateQueries({ queryKey:["tasks"]});
         },
     });
+}
+
+export function useUpdateTaskCompleted() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({ id, completed }: { id: string; completed: boolean }) =>
+        updateTaskCompleted(id, completed),
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["tasks"] });
+        },
+});
 }
